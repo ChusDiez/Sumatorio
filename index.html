@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Encuesta - Apto en Teoría</title>
   <style>
     body {
@@ -14,15 +14,28 @@
     header, footer {
       text-align: center;
     }
+    /* Reducir el tamaño de las imágenes */
+    header img {
+      width: auto;
+      max-width: 400px;
+      height: auto;
+    }
+    footer img {
+      width: auto;
+      max-width: 200px;
+      height: auto;
+    }
     form {
       margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <!-- Header con imagen -->
+  <!-- Header con imagen clicable -->
   <header>
-    <img src="https://iz.academy/wp-content/uploads/2025/02/eb_slider.png" alt="Header">
+    <a href="https://iz.academy" target="_blank">
+      <img src="https://iz.academy/wp-content/uploads/2025/02/eb_slider.png" alt="Header">
+    </a>
   </header>
 
   <h1>Encuesta de Notas</h1>
@@ -40,9 +53,11 @@
   </form>
   <div id="respuesta"></div>
 
-  <!-- Footer con imagen -->
+  <!-- Footer con imagen clicable -->
   <footer>
-    <img src="https://iz.academy/wp-content/uploads/2025/02/imagen-pn.png" alt="Footer">
+    <a href="https://iz.academy" target="_blank">
+      <img src="https://iz.academy/wp-content/uploads/2025/02/imagen-pn.png" alt="Footer">
+    </a>
   </footer>
 
   <script>
