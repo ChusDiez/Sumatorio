@@ -232,145 +232,183 @@
 
   <script>
     // Funcionalidad para modo oscuro/claro
-    const toggleButton = document.getElementById('toggleDarkMode');
-    toggleButton.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      toggleButton.textContent = document.body.classList.contains('dark') ? "☀️" : "🌙";
+// Asegúrate de reemplazar completamente el script anterior con este
+// Funcionalidad para modo oscuro/claro
+const toggleButton = document.getElementById('toggleDarkMode');
+toggleButton.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  toggleButton.textContent = document.body.classList.contains('dark') ? "☀️" : "🌙";
+});
+
+const form = document.getElementById('encuestaForm');
+const respuestaDiv = document.getElementById('respuesta');
+
+// URL de tu Google Apps Script Web App (ACTUALIZADA)
+const scriptURL = 'https://script.google.com/macros/s/AKfycbyTfaXS13n62SABYJdc4-sp1yUlif2lkTWf8SQw1Efv5aeVs3w_eMKf2ED96w6IvEN7/exec';
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  // Mostrar mensaje de progreso
+  respuestaDiv.innerHTML = 'Preparando datos...';
+  
+  // Obtener referencias a los campos
+  const teoriaInput = form.querySelector('input[name="notaTeoria"]');
+  const fisicaInput = form.querySelector('input[name="notaFisica"]');
+  const psicosInput = form.querySelector('input[name="notaPsicos"]');
+  
+  // Convertir comas a puntos en los campos numéricos
+  teoriaInput.value = teoriaInput.value.replace(/,/g, '.');
+  fisicaInput.value = fisicaInput.value.replace(/,/g, '.');
+  psicosInput.value = psicosInput.value.replace(/,/g, '.');
+  
+  // Verificar y log de los valores para depuración
+  console.log('Nota Teoría:', teoriaInput.value);
+  console.log('Nota Física:', fisicaInput.value);
+  console.log('Nota Psicos:', psicosInput.value);
+  
+  // Comprobar que se haya seleccionado un archivo
+  const fileInput = form.querySelector('input[name="captura"]');
+  if (!fileInput.files || fileInput.files.length === 0) {
+    respuestaDiv.innerHTML = 'Debes seleccionar una imagen.';
+    return;
+  }
+  
+  // Comprobar el tamaño del archivo (máximo 2MB)
+  const maxSize = 2 * 1024 * 1024; // 2 MB en bytes
+  if (fileInput.files[0].size > maxSize) {
+    respuestaDiv.innerHTML = 'La imagen es demasiado grande. Por favor, usa una imagen de menos de 2MB.';
+    return;
+  }
+  
+  try {
+    // Deshabilitar el botón de envío para evitar múltiples envíos
+    const submitButton = form.querySelector('.submit-button');
+    submitButton.disabled = true;
+    submitButton.innerHTML = 'Procesando...';
+    
+    // Mostrar progreso
+    respuestaDiv.innerHTML = 'Codificando imagen...';
+    
+    // Codificar la imagen a base64
+    const imageBase64 = await fileToBase64(fileInput.files[0]);
+    
+    // Crear objeto de datos asegurando que todos los campos se envíen correctamente
+    const formData = new FormData();
+    formData.append('notaTeoria', teoriaInput.value);
+    formData.append('notaFisica', fisicaInput.value); // Asegurar que este campo se envía correctamente
+    formData.append('notaPsicos', psicosInput.value);
+    
+    if (form.militar.checked) {
+      formData.append('militar', 'on');
+    }
+    
+    formData.append('imageBase64', imageBase64);
+    
+    // Debug - Verificar que todos los campos están en formData
+    for (let [key, value] of formData.entries()) {
+      if (key !== 'imageBase64') { // No log para la imagen porque es muy larga
+        console.log(`${key}: ${value}`);
+      } else {
+        console.log(`${key}: [datos de imagen]`);
+      }
+    }
+    
+    // Enviar datos
+    respuestaDiv.innerHTML = 'Enviando datos. Por favor, espera...';
+    
+    const response = await fetch(scriptURL, {
+      method: 'POST',
+      body: formData
     });
-
-    const form = document.getElementById('encuestaForm');
-    const respuestaDiv = document.getElementById('respuesta');
-    // URL de tu Google Apps Script Web App (ACTUALIZADA)
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzRnUi-EzdQVq9iFvCNkiIOhgPqvnm_a4CC5VbX4Jp_UNJwSVb8gjF6LR64d2sReTeV/exec';
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    
+    // Leer y procesar la respuesta
+    const responseText = await response.text();
+    console.log('Respuesta completa:', responseText);
+    
+    try {
+      // Intentar parsear como JSON
+      const data = JSON.parse(responseText);
+      if (data.status === 'success') {
+        respuestaDiv.innerHTML = 'Datos enviados correctamente.';
+        alert('Envío correcto');
+        form.reset();
+      } else {
+        respuestaDiv.innerHTML = 'Error: ' + data.message;
+        console.error('Error del servidor:', data.message);
+      }
+    } catch (e) {
+      // Si no es JSON válido
+      console.error('Error parseando respuesta:', e);
+      if (responseText.includes('success')) {
+        respuestaDiv.innerHTML = 'Datos enviados correctamente.';
+        alert('Envío correcto');
+        form.reset();
+      } else {
+        respuestaDiv.innerHTML = 'Error en la respuesta del servidor: ' + responseText.substring(0, 100);
+      }
+    }
+    
+    // Reactivar el botón de envío
+    submitButton.disabled = false;
+    submitButton.innerHTML = 'Enviar';
+    
+  } catch (error) {
+    console.error('Error completo:', error);
+    respuestaDiv.innerHTML = 'Error al procesar la solicitud: ' + error.message;
+    
+    // Si falla, intentar con el método no-cors como último recurso
+    try {
+      respuestaDiv.innerHTML = 'Reintentando con método alternativo...';
       
-      // Mostrar mensaje de progreso
-      respuestaDiv.innerHTML = 'Preparando datos...';
-      
-      // Convertir comas a puntos en los campos numéricos
-      form.notaTeoria.value = form.notaTeoria.value.replace(/,/g, '.');
-      form.notaFisica.value = form.notaFisica.value.replace(/,/g, '.'); // Nuevo campo
-      form.notaPsicos.value = form.notaPsicos.value.replace(/,/g, '.');
-      
-      // Comprobar que se haya seleccionado un archivo
-      const fileInput = form.querySelector('input[name="captura"]');
-      if (!fileInput.files || fileInput.files.length === 0) {
-        respuestaDiv.innerHTML = 'Debes seleccionar una imagen.';
-        return;
+      const formData = new FormData();
+      formData.append('notaTeoria', teoriaInput.value);
+      formData.append('notaFisica', fisicaInput.value);
+      formData.append('notaPsicos', psicosInput.value);
+      if (form.militar.checked) {
+        formData.append('militar', 'on');
       }
       
-      // Comprobar el tamaño del archivo (máximo 2MB)
-      const maxSize = 2 * 1024 * 1024; // 2 MB en bytes
-      if (fileInput.files[0].size > maxSize) {
-        respuestaDiv.innerHTML = 'La imagen es demasiado grande. Por favor, usa una imagen de menos de 2MB.';
-        return;
-      }
+      // Para el método alternativo, enviamos el archivo directamente en lugar de base64
+      formData.append('captura', fileInput.files[0]);
       
-      try {
-        // Deshabilitar el botón de envío para evitar múltiples envíos
-        const submitButton = form.querySelector('.submit-button');
-        submitButton.disabled = true;
-        submitButton.innerHTML = 'Procesando...';
-        
-        // Mostrar progreso
-        respuestaDiv.innerHTML = 'Codificando imagen...';
-        
-        // Codificar la imagen a base64
-        const imageBase64 = await fileToBase64(fileInput.files[0]);
-        
-        // Crear objeto de datos
-        const formData = new FormData();
-        formData.append('notaTeoria', form.notaTeoria.value);
-        formData.append('notaFisica', form.notaFisica.value); // Nuevo campo
-        formData.append('notaPsicos', form.notaPsicos.value);
-        if (form.militar.checked) {
-          formData.append('militar', 'on');
-        }
-        formData.append('imageBase64', imageBase64);
-        
-        // Enviar datos
-        respuestaDiv.innerHTML = 'Enviando datos. Por favor, espera...';
-        
-        const response = await fetch(scriptURL, {
-          method: 'POST',
-          body: formData
-        });
-        
-        const responseText = await response.text();
-        console.log('Respuesta:', responseText);
-        
-        try {
-          // Intentar parsear como JSON
-          const data = JSON.parse(responseText);
-          if (data.status === 'success') {
-            respuestaDiv.innerHTML = 'Datos enviados correctamente.';
-            alert('Envío correcto');
-            form.reset();
-          } else {
-            respuestaDiv.innerHTML = 'Error: ' + data.message;
-          }
-        } catch (e) {
-          // Si no es JSON válido
-          if (responseText.includes('success')) {
-            respuestaDiv.innerHTML = 'Datos enviados correctamente.';
-            alert('Envío correcto');
-            form.reset();
-          } else {
-            respuestaDiv.innerHTML = 'Error en la respuesta del servidor.';
-          }
-        }
+      await fetch(scriptURL, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors'
+      });
+      
+      // No podemos verificar la respuesta con no-cors
+      setTimeout(() => {
+        respuestaDiv.innerHTML = 'Envío alternativo completado. Verifica los resultados en Google Sheets.';
+        form.reset();
         
         // Reactivar el botón de envío
+        const submitButton = form.querySelector('.submit-button');
         submitButton.disabled = false;
         submitButton.innerHTML = 'Enviar';
-        
-      } catch (error) {
-        console.error('Error:', error);
-        respuestaDiv.innerHTML = 'Error al procesar la solicitud: ' + error.message;
-        
-        // Si falla, intentar con el método no-cors
-        try {
-          respuestaDiv.innerHTML = 'Reintentando con método alternativo...';
-          
-          const formData = new FormData(form);
-          await fetch(scriptURL, {
-            method: 'POST',
-            body: formData,
-            mode: 'no-cors'
-          });
-          
-          // No podemos verificar la respuesta con no-cors
-          setTimeout(() => {
-            respuestaDiv.innerHTML = 'Envío alternativo completado. Por favor, verifica los resultados en Google Sheets.';
-            form.reset();
-            
-            // Reactivar el botón de envío
-            const submitButton = form.querySelector('.submit-button');
-            submitButton.disabled = false;
-            submitButton.innerHTML = 'Enviar';
-          }, 2000);
-        } catch (retryError) {
-          respuestaDiv.innerHTML = 'Error en ambos métodos de envío. Por favor, intenta nuevamente más tarde.';
-          
-          // Reactivar el botón de envío incluso en caso de error
-          const submitButton = form.querySelector('.submit-button');
-          submitButton.disabled = false;
-          submitButton.innerHTML = 'Enviar';
-        }
-      }
-    });
-
-    // Función para convertir un archivo a base64
-    function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-      });
+      }, 2000);
+    } catch (retryError) {
+      respuestaDiv.innerHTML = 'Error en ambos métodos de envío. Por favor, intenta nuevamente más tarde.';
+      console.error('Error en método alternativo:', retryError);
+      
+      // Reactivar el botón de envío incluso en caso de error
+      const submitButton = form.querySelector('.submit-button');
+      submitButton.disabled = false;
+      submitButton.innerHTML = 'Enviar';
     }
+  }
+});
+
+// Función para convertir un archivo a base64
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
   </script>
 </body>
 </html>
