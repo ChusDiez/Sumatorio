@@ -198,6 +198,11 @@
       <input type="text" name="notaTeoria" pattern="^\d+([.,]\d{1,4})?$" inputmode="decimal" required>
       <div class="hint">Ejemplo: 3.4567 o 3,4567</div>
       
+      <!-- Nuevo campo para Física -->
+      <label for="notaFisica">Nota de Física:</label>
+      <input type="text" name="notaFisica" pattern="^\d+([.,]\d{1,4})?$" inputmode="decimal" required>
+      <div class="hint">Ejemplo: 3.4567 o 3,4567</div>
+      
       <label for="notaPsicos">Nota Psicos:</label>
       <input type="text" name="notaPsicos" pattern="^\d+([.,]\d{1,4})?$" inputmode="decimal" required>
       <div class="hint">Ejemplo: 4.1234 o 4,1234</div>
@@ -246,6 +251,7 @@
       
       // Convertir comas a puntos en los campos numéricos
       form.notaTeoria.value = form.notaTeoria.value.replace(/,/g, '.');
+      form.notaFisica.value = form.notaFisica.value.replace(/,/g, '.'); // Nuevo campo
       form.notaPsicos.value = form.notaPsicos.value.replace(/,/g, '.');
       
       // Comprobar que se haya seleccionado un archivo
@@ -277,6 +283,7 @@
         // Crear objeto de datos
         const formData = new FormData();
         formData.append('notaTeoria', form.notaTeoria.value);
+        formData.append('notaFisica', form.notaFisica.value); // Nuevo campo
         formData.append('notaPsicos', form.notaPsicos.value);
         if (form.militar.checked) {
           formData.append('militar', 'on');
