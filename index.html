@@ -48,11 +48,11 @@
     }
     /* Imágenes con tamaños fijos */
     header img {
-      width: 80px;
+      width: 400px;
       height: auto;
     }
     footer img {
-      width: 50px;
+      width: 250px;
       height: auto;
     }
     h1 {
@@ -135,14 +135,14 @@
     <form id="encuestaForm" method="POST" enctype="multipart/form-data">
       <label for="notaTeoria">Nota de Teoría:</label>
       <input type="text" name="notaTeoria" pattern="^\d+(\.\d{1,4})?$" inputmode="decimal" required>
-      <div class="hint">Acepta números enteros o con hasta 4 decimales (usa el punto (.) como separador)</div>
+      <div class="hint">Acepta números enteros o con hasta 4 decimales (usa el punto (.) como separador). Ejemplo: 3.4567</div>
       
       <label for="notaPsicos">Nota Psicos:</label>
       <input type="text" name="notaPsicos" pattern="^\d+(\.\d{1,4})?$" inputmode="decimal" required>
-      <div class="hint">Acepta números enteros o con hasta 4 decimales (usa el punto (.) como separador)</div>
+      <div class="hint">Acepta números enteros o con hasta 4 decimales (usa el punto (.) como separador). Ejemplo: 4.1234</div>
       
       <label for="captura">Captura de imagen del apto en teoría:</label>
-      <input type="file" name="captura" accept="image/*" capture="environment" required>
+      <input type="file" name="captura" accept="image/jpeg,image/heic" required>
       
       <button type="submit" class="submit-button">Enviar</button>
     </form>
@@ -185,6 +185,9 @@
         .then(response => response.json())
         .then(data => {
           respuestaDiv.innerHTML = data.message;
+          if (data.status === 'success') {
+            alert("Envío correcto");
+          }
           form.reset();
         })
         .catch(error => {
