@@ -130,6 +130,7 @@
         <img src="https://iz.academy/wp-content/uploads/2025/02/eb_slider.png" alt="Header">
       </a>
     </header>
+
     <h1>Encuesta de Notas</h1>
     <form id="encuestaForm" method="POST" enctype="multipart/form-data">
       <label for="notaTeoria">Nota de Teoría:</label>
@@ -146,6 +147,7 @@
       <button type="submit" class="submit-button">Enviar</button>
     </form>
     <div id="respuesta"></div>
+
     <!-- Footer con imagen clicable -->
     <footer>
       <a href="https://iz.academy" target="_blank">
@@ -153,8 +155,10 @@
       </a>
     </footer>
   </div>
+
   <!-- Botón flotante para cambiar modo oscuro/claro -->
   <button id="toggleDarkMode" title="Cambiar modo">🌙</button>
+
   <script>
     // Modo oscuro/claro
     const toggleButton = document.getElementById('toggleDarkMode');
@@ -162,29 +166,38 @@
       document.body.classList.toggle('dark');
       toggleButton.textContent = document.body.classList.contains('dark') ? "☀️" : "🌙";
     });
+
     const form = document.getElementById('encuestaForm');
     const respuestaDiv = document.getElementById('respuesta');
     // URL de tu Google Apps Script Web App (nuevo ID)
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyyVPPFpHkcD3HMj1RhtRtRNGhRzvI02RYo1Mk-zilhX6cJMRDgyPYzsQ7CXQTthT-q/exec';
+
     form.addEventListener('submit', e => {
       e.preventDefault();
       // Convertir comas a puntos en los campos numéricos
       form.notaTeoria.value = form.notaTeoria.value.replace(/,/g, '.');
       form.notaPsicos.value = form.notaPsicos.value.replace(/,/g, '.');
       const formData = new FormData(form);
-      fetch(scriptURL, { method: 'POST', body: formData })
-        .then(response => response.json())
-        .then(data => {
+      
+      // Usar XMLHttpRequest en lugar de fetch para asegurar el envío del archivo
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', scriptURL);
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          const data = JSON.parse(xhr.responseText);
           respuestaDiv.innerHTML = data.message;
           if (data.status === 'success') {
             alert("Envío correcto");
           }
           form.reset();
-        })
-        .catch(error => {
-          console.error('Error:', error);
+        } else {
           respuestaDiv.innerHTML = 'Ha ocurrido un error, inténtalo de nuevo.';
-        });
+        }
+      };
+      xhr.onerror = function() {
+        respuestaDiv.innerHTML = 'Ha ocurrido un error, inténtalo de nuevo.';
+      };
+      xhr.send(formData);
     });
   </script>
 </body>
