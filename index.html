@@ -46,7 +46,7 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    /* Imágenes con tamaños fijos */
+    /* Header a 400px y footer a 250px */
     header img {
       width: 400px;
       height: auto;
@@ -130,11 +130,9 @@
         <img src="https://iz.academy/wp-content/uploads/2025/02/eb_slider.png" alt="Header">
       </a>
     </header>
-
     <h1>Encuesta de Notas</h1>
     <form id="encuestaForm" method="POST" enctype="multipart/form-data">
       <label for="notaTeoria">Nota de Teoría:</label>
-      <!-- Permite dígitos seguidos opcionalmente de un separador (coma o punto) y hasta 4 decimales -->
       <input type="text" name="notaTeoria" pattern="^\d+([.,]\d{1,4})?$" inputmode="decimal" required>
       <div class="hint">Acepta números enteros o con hasta 4 decimales (usa coma o punto). Ejemplo: 3.4567 o 3,4567</div>
       
@@ -148,7 +146,6 @@
       <button type="submit" class="submit-button">Enviar</button>
     </form>
     <div id="respuesta"></div>
-
     <!-- Footer con imagen clicable -->
     <footer>
       <a href="https://iz.academy" target="_blank">
@@ -156,33 +153,25 @@
       </a>
     </footer>
   </div>
-
   <!-- Botón flotante para cambiar modo oscuro/claro -->
   <button id="toggleDarkMode" title="Cambiar modo">🌙</button>
-
   <script>
-    // Funcionalidad para el modo oscuro/claro
+    // Modo oscuro/claro
     const toggleButton = document.getElementById('toggleDarkMode');
     toggleButton.addEventListener('click', () => {
       document.body.classList.toggle('dark');
-      // Cambiar el icono del botón según el modo
       toggleButton.textContent = document.body.classList.contains('dark') ? "☀️" : "🌙";
     });
-
     const form = document.getElementById('encuestaForm');
     const respuestaDiv = document.getElementById('respuesta');
-    // URL de tu Google Apps Script Web App
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbzRU6AcaBxOLpG9z9cRfBIIuWIItQHy6YywnMuceSTIGR7ATS4fV8PAAGv-vUM7p8SF/exec';
-
+    // URL de tu Google Apps Script Web App (nuevo ID)
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyyVPPFpHkcD3HMj1RhtRtRNGhRzvI02RYo1Mk-zilhX6cJMRDgyPYzsQ7CXQTthT-q/exec';
     form.addEventListener('submit', e => {
       e.preventDefault();
-      
-      // Reemplaza comas por puntos en los campos numéricos
+      // Convertir comas a puntos en los campos numéricos
       form.notaTeoria.value = form.notaTeoria.value.replace(/,/g, '.');
       form.notaPsicos.value = form.notaPsicos.value.replace(/,/g, '.');
-
       const formData = new FormData(form);
-
       fetch(scriptURL, { method: 'POST', body: formData })
         .then(response => response.json())
         .then(data => {
