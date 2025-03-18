@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Encuesta - Apto en Teoría</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0 auto;
+      max-width: 600px;
+      padding: 20px;
+    }
+    header, footer {
+      text-align: center;
+    }
+    form {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header con imagen -->
+  <header>
+    <img src="https://iz.academy/wp-content/uploads/2025/02/eb_slider.png" alt="Header">
+  </header>
+
+  <h1>Encuesta de Notas</h1>
+  <form id="encuestaForm" method="POST" enctype="multipart/form-data">
+    <label for="notaTeoria">Nota de Teoría:</label>
+    <input type="number" name="notaTeoria" step="0.1" required>
+    <br><br>
+    <label for="notaPsicos">Nota Psicos:</label>
+    <input type="number" name="notaPsicos" step="0.1" required>
+    <br><br>
+    <label for="captura">Captura de imagen del apto en teoría:</label>
+    <input type="file" name="captura" accept="image/*" capture="environment" required>
+    <br><br>
+    <button type="submit">Enviar</button>
+  </form>
+  <div id="respuesta"></div>
+
+  <!-- Footer con imagen -->
+  <footer>
+    <img src="https://iz.academy/wp-content/uploads/2025/02/imagen-pn.png" alt="Footer">
+  </footer>
+
+  <script>
+    const form = document.getElementById('encuestaForm');
+    const respuestaDiv = document.getElementById('respuesta');
+    // URL de tu Google Apps Script Web App
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwg2G27bxQL3l5SeAQCycLYtpSNX49JfUBO2LZtVJTn61JETEs651mggOTAF4P1Didn/exec';
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      fetch(scriptURL, { method: 'POST', body: formData })
+        .then(response => response.json())
+        .then(data => {
+          respuestaDiv.innerHTML = data.message;
+          form.reset();
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          respuestaDiv.innerHTML = 'Ha ocurrido un error, inténtalo de nuevo.';
+        });
+    });
+  </script>
+</body>
+</html>
