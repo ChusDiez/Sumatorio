@@ -46,7 +46,7 @@
       text-align: center;
       margin-bottom: 20px;
     }
- 
+    /* Imágenes con tamaños fijos */
     header img {
       width: 400px;
       height: auto;
@@ -134,15 +134,16 @@
     <h1>Encuesta de Notas</h1>
     <form id="encuestaForm" method="POST" enctype="multipart/form-data">
       <label for="notaTeoria">Nota de Teoría:</label>
-      <input type="text" name="notaTeoria" pattern="^\d+(\.\d{1,4})?$" inputmode="decimal" required>
-      <div class="hint">Acepta números enteros o con hasta 4 decimales (usa el punto (.) como separador). Ejemplo: 3.4567</div>
+      <!-- Permite dígitos seguidos opcionalmente de un separador (coma o punto) y hasta 4 decimales -->
+      <input type="text" name="notaTeoria" pattern="^\d+([.,]\d{1,4})?$" inputmode="decimal" required>
+      <div class="hint">Acepta números enteros o con hasta 4 decimales (usa coma o punto). Ejemplo: 3.4567 o 3,4567</div>
       
       <label for="notaPsicos">Nota Psicos:</label>
-      <input type="text" name="notaPsicos" pattern="^\d+(\.\d{1,4})?$" inputmode="decimal" required>
-      <div class="hint">Acepta números enteros o con hasta 4 decimales (usa el punto (.) como separador). Ejemplo: 4.1234</div>
+      <input type="text" name="notaPsicos" pattern="^\d+([.,]\d{1,4})?$" inputmode="decimal" required>
+      <div class="hint">Acepta números enteros o con hasta 4 decimales (usa coma o punto). Ejemplo: 4.1234 o 4,1234</div>
       
       <label for="captura">Captura de imagen del apto en teoría:</label>
-      <input type="file" name="captura" accept="image/jpeg,image/png,image/heic" required>
+      <input type="file" name="captura" accept="image/jpeg,image/heic,image/png" required>
       
       <button type="submit" class="submit-button">Enviar</button>
     </form>
@@ -165,11 +166,7 @@
     toggleButton.addEventListener('click', () => {
       document.body.classList.toggle('dark');
       // Cambiar el icono del botón según el modo
-      if (document.body.classList.contains('dark')) {
-        toggleButton.textContent = "☀️";
-      } else {
-        toggleButton.textContent = "🌙";
-      }
+      toggleButton.textContent = document.body.classList.contains('dark') ? "☀️" : "🌙";
     });
 
     const form = document.getElementById('encuestaForm');
@@ -179,6 +176,11 @@
 
     form.addEventListener('submit', e => {
       e.preventDefault();
+      
+      // Reemplaza comas por puntos en los campos numéricos
+      form.notaTeoria.value = form.notaTeoria.value.replace(/,/g, '.');
+      form.notaPsicos.value = form.notaPsicos.value.replace(/,/g, '.');
+
       const formData = new FormData(form);
 
       fetch(scriptURL, { method: 'POST', body: formData })
