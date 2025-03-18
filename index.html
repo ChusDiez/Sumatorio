@@ -48,11 +48,11 @@
     }
     /* Imágenes con tamaños fijos */
     header img {
-      width: 360px;
+      width: 400px;
       height: auto;
     }
     footer img {
-      width: 200px;
+      width: 250px;
       height: auto;
     }
     h1 {
@@ -69,11 +69,16 @@
     input[type="file"] {
       width: 100%;
       padding: 8px;
-      margin-bottom: 15px;
+      margin-bottom: 5px;
       border: 1px solid var(--input-border);
       border-radius: 5px;
       box-sizing: border-box;
       background-color: var(--input-bg);
+      color: var(--text-color);
+    }
+    small {
+      display: block;
+      margin-bottom: 15px;
       color: var(--text-color);
     }
     button.submit-button {
@@ -129,10 +134,12 @@
     <h1>Encuesta de Notas</h1>
     <form id="encuestaForm" method="POST" enctype="multipart/form-data">
       <label for="notaTeoria">Nota de Teoría:</label>
-      <input type="number" name="notaTeoria" step="0.1" required>
+      <input type="number" name="notaTeoria" step="0.0001" required>
+      <small>Usa el punto (.) para separar decimales. Ejemplo: 3.4567</small>
       
       <label for="notaPsicos">Nota Psicos:</label>
-      <input type="number" name="notaPsicos" step="0.1" required>
+      <input type="number" name="notaPsicos" step="0.0001" required>
+      <small>Usa el punto (.) para separar decimales. Ejemplo: 4.1234</small>
       
       <label for="captura">Captura de imagen del apto en teoría:</label>
       <input type="file" name="captura" accept="image/*" capture="environment" required>
