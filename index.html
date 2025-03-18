@@ -17,6 +17,9 @@
       /* Añadir variables RGB para poder usar alpha */
       --button-bg-rgb: 0, 123, 255;
       --button-hover-rgb: 0, 86, 179;
+      --warning-bg: #fff3cd;
+      --warning-text: #856404;
+      --warning-border: #ffeeba;
     }
     /* Variables de color para modo oscuro */
     .dark {
@@ -29,6 +32,9 @@
       --button-hover: #9a67ea;
       --button-bg-rgb: 187, 134, 252;
       --button-hover-rgb: 154, 103, 234;
+      --warning-bg: #2c2a16;
+      --warning-text: #ffda6a;
+      --warning-border: #665e33;
     }
     body {
       background-color: var(--bg-color);
@@ -113,6 +119,20 @@
       color: var(--text-color);
       opacity: 0.8;
     }
+    /* Estilo para el aviso de tiempo de procesamiento */
+    .processing-warning {
+      background-color: var(--warning-bg);
+      color: var(--warning-text);
+      border: 1px solid var(--warning-border);
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .processing-warning i {
+      margin-right: 5px;
+    }
     button.submit-button {
       background-color: var(--button-bg);
       color: #fff;
@@ -185,6 +205,11 @@
       <label for="captura">Captura de imagen del apto en teoría:</label>
       <input type="file" name="captura" accept="image/jpeg,image/heic,image/png" required>
       
+      <!-- Aviso de tiempo de procesamiento -->
+      <div class="processing-warning">
+        <i>⏱️</i> El envío puede tardar varios segundos en procesarse. Por favor, espera y no cierres la página.
+      </div>
+      
       <button type="submit" class="submit-button">Enviar</button>
     </form>
     <div id="respuesta"></div>
@@ -238,6 +263,11 @@
       }
       
       try {
+        // Deshabilitar el botón de envío para evitar múltiples envíos
+        const submitButton = form.querySelector('.submit-button');
+        submitButton.disabled = true;
+        submitButton.innerHTML = 'Procesando...';
+        
         // Mostrar progreso
         respuestaDiv.innerHTML = 'Codificando imagen...';
         
@@ -254,7 +284,7 @@
         formData.append('imageBase64', imageBase64);
         
         // Enviar datos
-        respuestaDiv.innerHTML = 'Enviando datos...';
+        respuestaDiv.innerHTML = 'Enviando datos. Por favor, espera...';
         
         const response = await fetch(scriptURL, {
           method: 'POST',
@@ -284,6 +314,11 @@
             respuestaDiv.innerHTML = 'Error en la respuesta del servidor.';
           }
         }
+        
+        // Reactivar el botón de envío
+        submitButton.disabled = false;
+        submitButton.innerHTML = 'Enviar';
+        
       } catch (error) {
         console.error('Error:', error);
         respuestaDiv.innerHTML = 'Error al procesar la solicitud: ' + error.message;
@@ -303,9 +338,19 @@
           setTimeout(() => {
             respuestaDiv.innerHTML = 'Envío alternativo completado. Por favor, verifica los resultados en Google Sheets.';
             form.reset();
+            
+            // Reactivar el botón de envío
+            const submitButton = form.querySelector('.submit-button');
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Enviar';
           }, 2000);
         } catch (retryError) {
           respuestaDiv.innerHTML = 'Error en ambos métodos de envío. Por favor, intenta nuevamente más tarde.';
+          
+          // Reactivar el botón de envío incluso en caso de error
+          const submitButton = form.querySelector('.submit-button');
+          submitButton.disabled = false;
+          submitButton.innerHTML = 'Enviar';
         }
       }
     });
