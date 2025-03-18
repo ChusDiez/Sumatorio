@@ -208,57 +208,101 @@
       toggleButton.textContent = document.body.classList.contains('dark') ? "☀️" : "🌙";
     });
 
-    const form = document.getElementById('encuestaForm');
-    const respuestaDiv = document.getElementById('respuesta');
-    // URL de tu Google Apps Script Web App
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxC9eV_WQrK7ZI-NeRAxzIGNoXQXB__1l1dveQfDVqWy-wmqb-qO4deWKQOuIMYdbq4/exec';
+   // Reemplaza esta parte en tu script HTML
+const form = document.getElementById('encuestaForm');
+const respuestaDiv = document.getElementById('respuesta');
+// URL de tu Google Apps Script Web App
+const scriptURL = 'https://script.google.com/macros/s/AKfycbyyVPPFpHkcD3HMj1RhtRtRNGhRzvI02RYo1Mk-zilhX6cJMRDgyPYzsQ7CXQTthT-q/exec';
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      
-      // Mostrar mensaje de progreso
-      respuestaDiv.innerHTML = 'Enviando datos, por favor espera...';
-      
-      // Convertir comas a puntos en los campos numéricos
-      form.notaTeoria.value = form.notaTeoria.value.replace(/,/g, '.');
-      form.notaPsicos.value = form.notaPsicos.value.replace(/,/g, '.');
-      
-      // Comprobar que se haya seleccionado un archivo
-      const fileInput = form.querySelector('input[name="captura"]');
-      if (!fileInput.files || fileInput.files.length === 0) {
-        respuestaDiv.innerHTML = 'Debes seleccionar una imagen.';
-        return;
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  
+  // Mostrar mensaje de progreso
+  respuestaDiv.innerHTML = 'Enviando datos, por favor espera...';
+  
+  // Convertir comas a puntos en los campos numéricos
+  form.notaTeoria.value = form.notaTeoria.value.replace(/,/g, '.');
+  form.notaPsicos.value = form.notaPsicos.value.replace(/,/g, '.');
+  
+  // Comprobar que se haya seleccionado un archivo
+  const fileInput = form.querySelector('input[name="captura"]');
+  if (!fileInput.files || fileInput.files.length === 0) {
+    respuestaDiv.innerHTML = 'Debes seleccionar una imagen.';
+    return;
+  }
+  
+  // Comprobar el tamaño del archivo (máximo 10MB)
+  const maxSize = 5 * 1024 * 1024; // 5 MB en bytes
+  if (fileInput.files[0].size > maxSize) {
+    respuestaDiv.innerHTML = 'La imagen es demasiado grande. Por favor, usa una imagen de menos de 5MB.';
+    return;
+  }
+  
+  const formData = new FormData(form);
+  
+  // Añadir información del tipo de archivo
+  const fileType = fileInput.files[0].type;
+  formData.append('fileType', fileType);
+  
+  // Método 1: Usar fetch con blob
+  respuestaDiv.innerHTML = 'Procesando imagen...';
+  
+  fetch(scriptURL, {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => {
+    console.log('Respuesta status:', response.status);
+    return response.text();
+  })
+  .then(data => {
+    console.log('Datos de respuesta:', data);
+    try {
+      const jsonData = JSON.parse(data);
+      respuestaDiv.innerHTML = jsonData.message || 'Datos enviados correctamente.';
+      if (jsonData.status === 'success') {
+        alert("Envío correcto");
+        form.reset();
+      } else {
+        respuestaDiv.innerHTML = 'Error: ' + jsonData.message;
       }
-      
-      // Comprobar el tamaño del archivo (máximo 10MB)
-      const maxSize = 10 * 1024 * 1024; // 10 MB en bytes
-      if (fileInput.files[0].size > maxSize) {
-        respuestaDiv.innerHTML = 'La imagen es demasiado grande. Por favor, usa una imagen de menos de 10MB.';
-        return;
+    } catch (e) {
+      // Si la respuesta no es JSON válido
+      if (data.includes('success')) {
+        respuestaDiv.innerHTML = 'Datos enviados correctamente.';
+        alert("Envío correcto");
+        form.reset();
+      } else {
+        respuestaDiv.innerHTML = 'Error en la respuesta del servidor.';
+        console.error('Error al parsear respuesta:', e);
       }
-      
-      const formData = new FormData(form);
-      
-      // Usar fetch en lugar de XMLHttpRequest
-      fetch(scriptURL, {
-        method: 'POST',
-        body: formData,
-        mode: 'no-cors' // Importante para solicitudes cross-origin
-      })
-      .then(response => {
-        // Como usamos 'no-cors', no podemos leer la respuesta directamente
-        // Esperamos 2 segundos y verificamos con otra solicitud GET
-        setTimeout(() => {
-          respuestaDiv.innerHTML = 'Datos enviados correctamente.';
-          alert("Envío correcto");
-          form.reset();
-        }, 2000);
-      })
-      .catch(error => {
-        respuestaDiv.innerHTML = 'Ha ocurrido un error: ' + error.message;
-        console.error('Error:', error);
-      });
+    }
+  })
+  .catch(error => {
+    // Si falló el primer método, intentamos con un segundo método (no-cors)
+    console.error('Error con método fetch estándar:', error);
+    respuestaDiv.innerHTML = 'Reintentando con método alternativo...';
+    
+    // Método 2: Usar fetch con no-cors
+    fetch(scriptURL, {
+      method: 'POST',
+      body: formData,
+      mode: 'no-cors'
+    })
+    .then(() => {
+      // Como usamos 'no-cors', no podemos leer la respuesta directamente
+      setTimeout(() => {
+        respuestaDiv.innerHTML = 'Datos enviados (método alternativo). Verifica el resultado en Google Sheets.';
+        alert("Envío completado (método alternativo)");
+        form.reset();
+      }, 2000);
+    })
+    .catch(error => {
+      respuestaDiv.innerHTML = 'Ha ocurrido un error: ' + error.message;
+      console.error('Error con método alternativo:', error);
     });
+  });
+});
   </script>
 </body>
 </html>
