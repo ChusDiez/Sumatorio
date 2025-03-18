@@ -81,6 +81,10 @@
       background-color: var(--input-bg);
       color: var(--text-color);
     }
+    /* Estilo para el checkbox */
+    .checkbox-group {
+      margin-bottom: 15px;
+    }
     button.submit-button {
       background-color: var(--button-bg);
       color: #fff;
@@ -135,13 +139,21 @@
     <form id="encuestaForm" method="POST" enctype="multipart/form-data">
       <label for="notaTeoria">Nota de Teoría:</label>
       <input type="text" name="notaTeoria" pattern="^\d+([.,]\d{1,4})?$" inputmode="decimal" required>
-      <div class="hint">Acepta números enteros o con hasta 4 decimales (usa coma o punto). Ejemplo: 3.4567 o 3,4567</div>
+      <div class="hint">Ejemplo: 3.4567 o 3,4567</div>
       
       <label for="notaPsicos">Nota Psicos:</label>
       <input type="text" name="notaPsicos" pattern="^\d+([.,]\d{1,4})?$" inputmode="decimal" required>
-      <div class="hint">Acepta números enteros o con hasta 4 decimales (usa coma o punto). Ejemplo: 4.1234 o 4,1234</div>
+      <div class="hint">Ejemplo: 4.1234 o 4,1234</div>
+      
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" name="militar" id="militar">
+          Marcar si eres militar
+        </label>
+      </div>
       
       <label for="captura">Captura de imagen del apto en teoría:</label>
+      <!-- Se ha eliminado el atributo "capture" para evitar interferencias -->
       <input type="file" name="captura" accept="image/jpeg,image/heic,image/png" required>
       
       <button type="submit" class="submit-button">Enviar</button>
@@ -160,7 +172,7 @@
   <button id="toggleDarkMode" title="Cambiar modo">🌙</button>
 
   <script>
-    // Modo oscuro/claro
+    // Funcionalidad para modo oscuro/claro
     const toggleButton = document.getElementById('toggleDarkMode');
     toggleButton.addEventListener('click', () => {
       document.body.classList.toggle('dark');
@@ -178,8 +190,8 @@
       form.notaTeoria.value = form.notaTeoria.value.replace(/,/g, '.');
       form.notaPsicos.value = form.notaPsicos.value.replace(/,/g, '.');
       const formData = new FormData(form);
-      
-      // Usar XMLHttpRequest en lugar de fetch para asegurar el envío del archivo
+
+      // Usar XMLHttpRequest para enviar el formulario
       var xhr = new XMLHttpRequest();
       xhr.open('POST', scriptURL);
       xhr.onload = function() {
