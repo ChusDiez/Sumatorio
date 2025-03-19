@@ -275,9 +275,9 @@ form.addEventListener('submit', async (e) => {
   }
   
   // Comprobar el tamaño del archivo (máximo 2MB)
-  const maxSize = 2 * 1024 * 1024; // 2 MB en bytes
+  const maxSize = 10 * 1024 * 1024; // 2 MB en bytes
   if (fileInput.files[0].size > maxSize) {
-    respuestaDiv.innerHTML = 'La imagen es demasiado grande. Por favor, usa una imagen de menos de 2MB.';
+    respuestaDiv.innerHTML = 'La imagen es demasiado grande. Por favor, usa una imagen de menos de 10MB.';
     return;
   }
   
